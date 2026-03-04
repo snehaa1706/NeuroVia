@@ -1,0 +1,589 @@
+/* CSS Variables based on instructions */
+:root {
+    --clinical-blue: #1A6FA8;
+    --healing-green: #28A98C;
+    --panel-bg: #F7FBFF;
+    --navy-text: #0D2B45;
+    --muted: #7AA3BE;
+    --error-red: #D32F2F;
+    --border-light: #DCE5ED;
+
+    --font-display: 'DM Serif Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+}
+
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--panel-bg);
+    color: var(--navy-text);
+    min-height: 100vh;
+}
+
+/* Layout Grid */
+.page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 460px;
+    min-height: 100vh;
+    width: 100vw;
+}
+
+/* ========================================= */
+/* LEFT PANEL: HERO                          */
+/* ========================================= */
+.hero-panel {
+    position: relative;
+    background-color: #0A1E32;
+    /* Fallback */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px;
+    color: white;
+}
+
+.hero-bg-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 1;
+    transition: transform 10s ease-out;
+    will-change: transform;
+}
+
+.hero-panel:hover .hero-bg-image {
+    transform: scale(1.03);
+}
+
+/* 
+   Subtle dual vignette overlay
+   1. Top-to-bottom dark fade
+   2. Left-edge shadow
+*/
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    background:
+        /* Top-to-bottom dark edge (for logo and text readability) */
+        linear-gradient(to bottom,
+            rgba(10, 30, 50, 0.42) 0%,
+            transparent 40%,
+            transparent 60%,
+            rgba(10, 30, 50, 0.55) 100%),
+        /* Left-edge shadow for main text block */
+        linear-gradient(to right,
+            rgba(10, 30, 50, 0.35) 0%,
+            transparent 60%);
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 3;
+    max-width: 600px;
+}
+
+/* Top Brand Header */
+.hero-header {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: fadeDown 0.8s ease-out forwards;
+}
+
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--clinical-blue), var(--healing-green));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(10, 30, 50, 0.2);
+}
+
+.logo-icon svg {
+    width: 20px;
+    height: 20px;
+    color: white;
+}
+
+.logo-text {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Center Content Block */
+.hero-main {
+    margin-bottom: auto;
+    /* Push footer down */
+    margin-top: 15vh;
+    /* Push down from top */
+    animation: fadeUp 1s ease-out 0.2s forwards;
+    opacity: 0;
+}
+
+.eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #A8EDDE;
+    margin-bottom: 16px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-title {
+    font-family: var(--font-display);
+    font-size: 64px;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.hero-title .emphasis {
+    font-style: italic;
+    color: #A8EDDE;
+}
+
+.hero-subtitle {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    max-width: 500px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    font-weight: 400;
+}
+
+/* Glassmorphism Pills */
+.feature-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 13px;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.pill svg {
+    width: 14px;
+    height: 14px;
+}
+
+.hero-footer {
+    position: relative;
+    z-index: 3;
+    font-size: 12px;
+    opacity: 0.8;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ========================================= */
+/* RIGHT PANEL: LOGIN                        */
+/* ========================================= */
+.login-panel {
+    background-color: var(--panel-bg);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    opacity: 0;
+    animation: slideIn 0.8s ease-out 0.4s forwards;
+}
+
+/* Top Bar Gradient */
+.login-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, var(--clinical-blue), var(--healing-green));
+}
+
+.login-card {
+    width: 100%;
+    max-width: 360px;
+}
+
+.login-title {
+    font-family: var(--font-display);
+    font-size: 36px;
+    margin-bottom: 8px;
+    color: var(--navy-text);
+}
+
+.login-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 40px;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.form-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--navy-text);
+}
+
+.forgot-link {
+    font-size: 12px;
+    color: var(--clinical-blue);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.forgot-link:hover {
+    color: var(--healing-green);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: white;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--navy-text);
+    transition: all 0.2s;
+}
+
+.form-input::placeholder {
+    color: #A0B5C6;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--clinical-blue);
+    box-shadow: 0 0 0 3px rgba(26, 111, 168, 0.1);
+}
+
+.form-input.is-invalid {
+    border-color: var(--error-red);
+    background-color: #FFFAFA;
+}
+
+.form-input.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+.error-message {
+    color: var(--error-red);
+    font-size: 12px;
+    margin-top: 6px;
+    font-weight: 500;
+    animation: fadeUp 0.3s ease-out;
+}
+
+
+/* Password Toggle */
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.password-toggle:hover {
+    color: var(--navy-text);
+}
+
+.password-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    height: 48px;
+    background: linear-gradient(to right, var(--clinical-blue), var(--healing-green));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 169, 140, 0.25);
+}
+
+.submit-btn:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+/* Button Shine Animation */
+.submit-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+    transform: skewX(-25deg);
+    transition: all 0.75s;
+}
+
+.submit-btn:hover::after {
+    animation: shine 1s;
+}
+
+.submit-btn.is-success {
+    background: var(--healing-green);
+}
+
+.submit-btn.is-loading {
+    pointer-events: none;
+    opacity: 0.9;
+}
+
+/* Social Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 32px 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.divider::before {
+    margin-right: 12px;
+}
+
+.divider::after {
+    margin-left: 12px;
+}
+
+/* Social Buttons */
+.social-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: white;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--navy-text);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.social-btn:hover {
+    background: #FAFCFE;
+    border-color: #B8CEDB;
+}
+
+.social-btn img {
+    width: 18px;
+    height: 18px;
+}
+
+/* Registration & Trust Badge */
+.register-text {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+}
+
+.register-text a {
+    color: var(--clinical-blue);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.register-text a:hover {
+    text-decoration: underline;
+}
+
+.trust-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #92B0C4;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.trust-badge svg {
+    width: 14px;
+    height: 14px;
+    color: var(--healing-green);
+}
+
+/* ========================================= */
+/* ANIMATIONS                                 */
+/* ========================================= */
+@keyframes fadeDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes shine {
+    100% {
+        left: 200%;
+    }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .page-wrapper {
+        grid-template-columns: 1fr 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-wrapper {
+        grid-template-columns: 1fr;
+        grid-template-rows: min-content auto;
+    }
+
+    .hero-panel {
+        padding: 32px 24px;
+        min-height: 480px;
+    }
+
+    .hero-title {
+        font-size: 48px;
+    }
+
+    .login-panel {
+        padding: 40px 24px;
+        border-top: 4px solid;
+        border-image: linear-gradient(to right, var(--clinical-blue), var(--healing-green)) 1;
+    }
+
+    .login-panel::before {
+        display: none;
+    }
+}

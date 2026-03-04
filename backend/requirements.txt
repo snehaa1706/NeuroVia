@@ -1,0 +1,11 @@
+fastapi==0.115.0
+uvicorn==0.30.0
+pydantic==2.9.0
+supabase==2.7.0
+python-dotenv==1.0.1
+openai==1.50.0
+passlib[bcrypt]==1.7.4
+slowapi==0.1.9
+python-multipart==0.0.9
+python-jose[cryptography]==3.3.0
+requests==2.31.0
