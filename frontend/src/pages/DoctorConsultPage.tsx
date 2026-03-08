@@ -3,7 +3,7 @@ import { Stethoscope, MapPin, Clock, Send, Loader2, BrainCircuit } from 'lucide-
 import { api } from '../lib/api';
 import type { User, Doctor, ConsultRequest } from '../types';
 import { ReportPanel } from '../components/ui/ReportPanel';
-
+import { CircularRiskGauge } from '../components/ui/CircularRiskGauge';
 interface Props {
     user: User;
 }
@@ -161,13 +161,12 @@ export default function DoctorConsultPage({ user }: Props) {
                                                     <p className="text-[#0D2B45] leading-relaxed">
                                                         Screening results and behavioral logs have been aggregated. The AI detected patterns consistent with early-stage cognitive changes. Further professional diagnostic testing is recommended.
                                                     </p>
-                                                    <div className="h-2 w-full bg-[#EBF4FA] rounded-full overflow-hidden">
-                                                        <div className="h-full bg-gradient-to-r from-[#28A98C] to-[#D97706] w-[65%]" />
-                                                    </div>
-                                                    <div className="flex justify-between text-xs font-bold text-[#9BB8CD] uppercase tracking-wider">
-                                                        <span>Low Risk</span>
-                                                        <span>Moderate Risk (65%)</span>
-                                                        <span>High Risk</span>
+                                                    <div className="flex items-center gap-6 mt-4 p-4 bg-white rounded-xl border border-[#DCE5ED] shadow-sm">
+                                                        <CircularRiskGauge score={65} size={80} strokeWidth={8} showLabel={false} />
+                                                        <div>
+                                                            <p className="font-bold text-[#0D2B45] uppercase tracking-wide text-sm mb-1">AI Evaluated Risk Level: Moderate</p>
+                                                            <p className="text-sm text-[#7AA3BE] leading-snug">The analysis falls into the 34-66% threshold indicating moderate risk. Specialist follow-up is recommended to confirm early-stage deterioration.</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}

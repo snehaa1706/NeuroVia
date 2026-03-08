@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 import type { User, Screening, Alert } from '../types';
+import { CircularRiskGauge } from '../components/ui/CircularRiskGauge';
 
 interface Props { user: User; }
 
@@ -100,8 +101,14 @@ export default function PatientDashboard({ user }: Props) {
                             <span className="text-2xl font-extrabold text-slate-800">{screenings.length}</span>
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">Screenings</span>
                         </div>
-                        <div className="flex flex-col items-center bg-white/70 backdrop-blur-sm rounded-2xl px-5 py-3 border border-white/50 shadow-sm min-w-[72px]">
-                            <span className="text-2xl font-extrabold text-teal-600">—</span>
+                        <div className="flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm rounded-2xl px-4 py-3 border border-white/50 shadow-sm min-w-[80px]">
+                            {latestAnalysis ? (
+                                <div className="mb-1">
+                                    <CircularRiskGauge score={latestAnalysis.risk_score} size={48} strokeWidth={5} showLabel={false} />
+                                </div>
+                            ) : (
+                                <span className="text-2xl font-extrabold text-teal-600">—</span>
+                            )}
                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">Risk Level</span>
                         </div>
                         <div className="flex flex-col items-center bg-white/70 backdrop-blur-sm rounded-2xl px-5 py-3 border border-white/50 shadow-sm min-w-[72px]">
