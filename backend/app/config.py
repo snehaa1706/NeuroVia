@@ -11,6 +11,7 @@ class Settings:
     SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")
     JWT_SECRET: str = os.getenv("JWT_SECRET", "neurovia-secret-key")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "ollama")
 
 
 settings = Settings()

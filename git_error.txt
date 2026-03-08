@@ -1,0 +1,100 @@
+﻿git : remote: error: 
+GH013: Repository rule 
+violations found for re
+fs/heads/feat/backend-p
+hases.        
+At line:1 char:1
++ git push origin 
+feat/backend-phases 
+2>&1 | Out-File 
+-Encoding UTF8 gi ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (remote: error   
+ : ...phases.          
+  :String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+remote: 
+remote: - GITHUB PUSH 
+PROTECTION        
+remote:   ΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö     
+   
+remote:     Resolve 
+the following 
+violations before 
+pushing again        
+remote: 
+remote:     - Push 
+cannot contain secrets 
+       
+remote: 
+remote:             
+remote:      (?) Learn 
+how to resolve a 
+blocked push        
+remote:      https://do
+cs.github.com/code-secu
+rity/secret-scanning/wo
+rking-with-secret-scann
+ing-and-push-protection
+/working-with-push-prot
+ection-from-the-command
+-line#resolving-a-block
+ed-push        
+remote:             
+remote:             
+remote:       ΓÇöΓÇö 
+Supabase Secret Key ΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö  
+      
+remote:        
+locations:        
+remote:          - 
+commit: d36d0e79e643e28
+1b893bb81f22c3a8c3af9f8
+ae        
+remote:            
+path: backend/.env:7   
+     
+remote:             
+remote:        (?) To 
+push, remove secret 
+from commit(s) or 
+follow this URL to 
+allow the secret.      
+  
+remote:        https://
+github.com/snehaa1706/N
+euroVia/security/secret
+-scanning/unblock-secre
+t/3Af0DnsMPFVRKhLRB5Qk0
+PY6a5x        
+remote:             
+remote: 
+remote: 
+To https://github.com/s
+nehaa1706/NeuroVia.git
+ ! [remote rejected] 
+feat/backend-phases -> 
+feat/backend-phases 
+(push declined due to 
+repository rule 
+violations)
+error: failed to push 
+some refs to 'https://g
+ithub.com/snehaa1706/Ne
+uroVia.git'

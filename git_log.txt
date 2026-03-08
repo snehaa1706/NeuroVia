@@ -1,0 +1,7 @@
+﻿2b0f5d0 chore: save additional changes
+22dad82 chore: save local
+553ce6c chore: save local changes before pull
+ed29a7c chore: save remaining unstaged files
+d36d0e7 feat: implement Phase 9, 10, 11 backends and plan Phase 12
+6d00769 feat: redesign patient dashboard, navbar, and sidebar to match reference
+6207cd8 Complete UI redesign and backend AI integration

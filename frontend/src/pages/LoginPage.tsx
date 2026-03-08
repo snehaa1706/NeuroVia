@@ -16,6 +16,20 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     const [emailError, setEmailError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [demoLoading, setDemoLoading] = useState(false);
+
+    const handleDemoLogin = async () => {
+        setDemoLoading(true);
+        setEmailError('');
+        try {
+            const response = await api.demoLogin();
+            setSuccess(true);
+            setTimeout(() => onLogin(response), 800);
+        } catch (err: any) {
+            setEmailError(err.message || 'Demo login failed. Please try again.');
+            setDemoLoading(false);
+        }
+    };
 
     const validateEmail = () => {
         const trimmedEmail = email.trim();
@@ -199,6 +213,36 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                                 <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
                             </svg>
                             Microsoft
+                        </button>
+                    </div>
+
+                    {/* Demo access */}
+                    <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #DCE5ED' }}>
+                        <p style={{ textAlign: 'center', fontSize: '12px', color: '#7AA3BE', marginBottom: '12px', fontWeight: '600', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Quick Demo Access</p>
+                        <button
+                            type="button"
+                            onClick={handleDemoLogin}
+                            disabled={demoLoading || loading || success}
+                            style={{
+                                width: '100%',
+                                padding: '14px',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #28A98C, #1A6FA8)',
+                                color: '#fff',
+                                fontWeight: '700',
+                                fontSize: '15px',
+                                border: 'none',
+                                cursor: demoLoading ? 'wait' : 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                boxShadow: '0 4px 20px rgba(40,169,140,0.35)',
+                                transition: 'all 0.2s ease',
+                                opacity: demoLoading ? 0.8 : 1,
+                            }}
+                        >
+                            {demoLoading ? '⏳ Setting up demo...' : '⚡ Try Demo — No Sign Up Needed'}
                         </button>
                     </div>
 

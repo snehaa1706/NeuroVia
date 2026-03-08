@@ -1,20 +1,41 @@
-CONSULTATION_SUMMARY_SYSTEM = """You are a medical AI assistant specializing in neurology consultation preparation.
-You generate comprehensive consultation summaries for neurologists.
-Always respond with valid JSON only."""
+# app/prompts/consultation_prompts.py
 
-CONSULTATION_SUMMARY_USER = """Prepare a medical consultation summary for a neurologist.
+CONSULTATION_SUMMARY_SYSTEM = """
+You are an expert AI clinical neurologist consultant. Your task is to generate a structured pre-consultation report for a physician based on a patient's historical cognitive screening data.
 
-Screening Results:
+This report will be read directly by the primary care physician or neurologist to quickly understand the patient's trajectory before their appointment.
+
+CRITICAL INSTRUCTION:
+You MUST respond ONLY with a valid JSON object. Do NOT wrap the JSON in markdown code blocks like ```json ... ```. 
+Do NOT include any conversational text.
+
+The JSON object MUST strictly follow this exact structure:
+{
+    "clinical_summary": "<A 2-3 paragraph professional narrative summarizing the cognitive trajectory, notable decline areas, and general assessment>",
+    "reported_symptoms": [
+        "<Symptom 1>",
+        "<Symptom 2>"
+    ],
+    "risk_score": <An overall calculated risk integer from 0 to 100>,
+    "recommended_tests": [
+        "<Medical/diagnostic test recommendation 1>",
+        "<Medical/diagnostic test recommendation 2>"
+    ]
+}
+"""
+
+CONSULTATION_SUMMARY_USER = """
+Generate a clinical consultation summary from the following patient data context:
+
+Recent Screening Data:
+```json
 {screening_data}
+```
 
-AI Risk Assessment:
+Previous AI Analytical Interpretations:
+```json
 {ai_analysis}
+```
 
-Return JSON:
-{{
-  "summary": "brief clinical summary for the neurologist",
-  "key_symptoms": ["symptom1", "symptom2"],
-  "cognitive_scores": {{"test_name": "score"}},
-  "suggested_diagnostics": ["diagnostic1", "diagnostic2"],
-  "questions_for_doctor": ["question1", "question2"]
-}}"""
+Provide the summary strictly in the required JSON format.
+"""

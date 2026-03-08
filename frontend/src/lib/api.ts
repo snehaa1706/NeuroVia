@@ -60,6 +60,10 @@ class ApiClient {
         return this.request<any>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
     }
 
+    async demoLogin() {
+        return this.request<any>('/auth/demo', { method: 'POST' });
+    }
+
     async getProfile() {
         return this.request<any>('/auth/me');
     }
