@@ -5,7 +5,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
-from app.routers import auth, screening, ai, ai_analysis, caregiver, doctor, activities, medications, alerts, analytics, consultations
+from app.routers import auth, screening, ai, ai_analysis, caregiver, doctor, activities, medications, alerts, analytics, consultations, demo
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -37,6 +37,7 @@ app.include_router(medications.router, prefix="/medications", tags=["Medications
 app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])
 app.include_router(consultations.router, prefix="/consultations", tags=["Consultations"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics Cache"])
+app.include_router(demo.router, prefix="/demo", tags=["Demo Environment"])
 
 
 @app.get("/")
