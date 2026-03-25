@@ -1,16 +1,18 @@
-import os
-# Make sure the package exists
-os.makedirs(os.path.dirname(__file__), exist_ok=True)
-with open(os.path.join(os.path.dirname(__file__), "__init__.py"), "w") as f:
-    pass
-with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), "__init__.py"), "w") as f:
-    pass
-
 from typing import Dict, Any
 
 # AD8 (Ascertain Dementia 8) - A brief informant interview to detect dementia
 # Raw scoring: 1 point for every "Yes, a change" answer.
 # Score >= 2 suggests cognitive impairment.
+
+MAX_SCORE = 8.0
+
+SEVERITY_THRESHOLDS = {
+    "normal": (0, 1),
+    "mild": (2, 3),
+    "moderate": (4, 5),
+    "severe": (6, 8),
+}
+
 
 def validate_responses(responses: Dict[str, Any]) -> bool:
     """Validate that the given responses contain all 8 required AD8 questions."""
@@ -22,6 +24,7 @@ def validate_responses(responses: Dict[str, Any]) -> bool:
         if responses[key] not in ["Yes", "No", "N/A"]:
             return False
     return True
+
 
 def calculate_score(responses: Dict[str, Any]) -> float:
     """
