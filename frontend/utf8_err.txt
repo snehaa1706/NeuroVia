@@ -1,0 +1,7 @@
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+src/pages/CaregiverDashboard.tsx(11,5): error TS6133: 'TrendingDown' is declared but its value is never read.
+src/pages/CaregiverDashboard.tsx(13,5): error TS6133: 'ChevronDown' is declared but its value is never read.
+src/pages/CaregiverDashboard.tsx(254,61): error TS6133: 'entry' is declared but its value is never read.

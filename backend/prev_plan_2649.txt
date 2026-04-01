@@ -1,0 +1,74 @@
+# Cognitive Features Integration Plan (Corrected)
+
+## SECTION 1 — Phase Overview
+We are expanding the caregiver module into an active cognitive intelligence platform. The architecture involves an isolated **Cognitive Engine** that seamlessly integrates results into the existing Caregiver AI insights, Alerts, and Patient Overviews. 
+- **Phase 1** — Database Setup (Sessions + Config + Results)
+- **Phase 2** — Models + Scoring (Test definitions and validation)
+- **Phase 3** — Service Layer (Session lifecycle and persistence)
+- **Phase 4** — Router Layer (RBAC fixes: patient vs caregiver)
+- **Phase 5** — Integration (Alerts, AI, Patient Overview)
+- **Phase 6** — Testing (Full mock coverage + edge cases)
+
+> [!IMPORTANT]
+> User Review Required: Please review the corrected integration rules below. Once approved, we will begin execution.
+
+---
+
+## SECTION 2 — Detailed Phases
+
+### Phase 1: Database Setup
+- **Objective:** Establish the foundation for persistent, reproducible cognitive test data.
+- **Files:** `[NEW] database/migrations/add_cognitive_tables.sql`
+- **Data Flow:** Raw configurations inserted on session start; final results inserted on submission.
+- **Rules/Safeguards:** Support for `test_config` JSONB to guarantee reproducible validation, and `status` (`in_progress`, `completed`) for duplicate prevention.
+  
+### Phase 2: Models & Scoring Layer
+- **Objective:** Strictly type HTTP contracts and score calculations.
+- **Files:** `[NEW] backend/app/models/cognitive.py`, `[NEW] backend/app/utils/cognitive_tests/*.py`
+- **Data Flow:** Extract requests via strict Pydantic structures -> Hand off to isolated mathematical scoring files (`memory`, `fluency`, `reaction`, `sequence`).
+- **Validation Rules:** The scoring layer *must* map responses against the original `test_config` before determining percentages. Reaction time uses normalized mapping `score = max(0, 100 - (time_ms/factor))`.
+
+### Phase 3: Service Layer
+- **Objective:** Control session lifecycle and data aggregation.
+- **Files:** `[NEW] backend/app/services/cognitive_service.py`
+- **Responsibilities:** 
+  1. `start_session`: Auto-generates `test_config` (e.g., specific words to memorize).
+  2. `submit_test`: Locks session from duplicate submissions, parses against config, routes to scorer.
+  3. `compute_cognitive_summary`: Calculates rolling averages and identifies drops.
+
+### Phase 4: Router Layer
+- **Objective:** Thin exposed endpoint routing with separated RBAC.
+- **Files:** `[NEW] backend/app/routers/cognitive.py`, `[MODIFY] backend/app/dependencies.py`
+- **RBAC Rules:** 
+  - `POST /cognitive/start` and `POST /cognitive/{session_id}/submit` are **patient** endpoints (`require_role(["patient"])`).
+  - `GET /cognitive/history` and `GET /cognitive/summary` are readable by both patients and their assigned **caregivers**.
+
+### Phase 5: Integration
+- **Objective:** Embed the isolated Cognitive Engine into neurovia's holistic oversight tools.
+- **Files:** `ai_service.py`, `caregiver_service.py`, `alert_service.py`
+- **Responsibilities:**
+  - Alert Engine: Fire a specific rule when `cognitive_service.compute_cognitive_summary()` identifies a sharp negative delta from long-term trends.
+  - Patient Overview: Attach nested `cognitive` summary properties directly into the existing `CaregiverOverview` GET endpoint.
+
+### Phase 6: Testing
+- **Objective:** Full deterministic testing without touching real AI/DB layers.
+- **Responsibilities:** Ensure `duplicate submission -> 400 Bad Request` and `caregiver submits -> 403 Forbidden` trigger properly.
+
+---
+
+## SECTION 3 — Task Checklist
+*See `task.md` for the structured checklist corresponding to these phases.*
+
+---
+
+## SECTION 4 — Integration Architecture
+1. **Alert Engine**: Dispatches event `event_type="cognitive_test"`. Handled cleanly inside `evaluate_event()` returning a prioritized drop severity.
+2. **AI Guidance**: Sanitizes the 5-test rolling trend. Feeds into prompts to alter generic advice based on objective cognitive ability state.
+3. **Patient Overview**: Directly aggregated alongside `caregiver_service.py` logs and med limits into a generic object structure.
+
+---
+
+## SECTION 5 — Risks & Safeguards
+- **Duplicate Prevention:** Handled in service layer via `status == "completed"` boolean gate.
+- **Test Integrity:** Implemented immutable `test_config` column at the moment of start_session so that answers sent hours later use strictly identical matching criteria.
+- **RBAC Overlap:** Split dependencies between `require_caregiver` and `require_patient`.
