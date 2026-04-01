@@ -9,7 +9,6 @@ import {
     ChevronLeft,
     ChevronRight,
     Brain,
-    Heart,
     Zap,
 } from 'lucide-react';
 import type { User } from '../../types';

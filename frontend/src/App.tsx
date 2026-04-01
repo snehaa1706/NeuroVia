@@ -13,12 +13,39 @@ import ActivitiesPage from './pages/ActivitiesPage';
 import DoctorConsultPage from './pages/DoctorConsultPage';
 import AlertsPage from './pages/AlertsPage';
 import MedicationsPage from './pages/MedicationsPage';
+import LandingPage from './pages/LandingPage';
 import './index.css';
+
+function ProtectedRoute({ user, children }: { user: User | null; children: React.ReactNode }) {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+}
+
+function DashboardLayout({ user, onLogout, children }: { user: User; onLogout: () => void; children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-[#F8FAFC]">
+      <Sidebar
+        user={user}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Navbar user={user} onLogout={onLogout} />
+        <main className="flex-1 overflow-y-auto bg-[#F8FAFC]">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     const token = api.getToken();
@@ -56,50 +83,72 @@ function App() {
     );
   }
 
-  if (!user) {
-    return (
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-          <Route path="/register" element={<RegisterPage onLogin={handleLogin} />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      </Router>
-    );
-  }
-
-  const getDashboardPath = () => {
-    switch (user.role) {
-      case 'caregiver': return '/caregiver';
-      case 'doctor': return '/consult';
-      default: return '/dashboard';
-    }
-  };
-
   return (
     <Router>
-      <div className="flex h-screen overflow-hidden bg-[#F8FAFC]">
-        <Sidebar
-          user={user}
-          isOpen={sidebarOpen}
-          onToggle={() => setSidebarOpen(!sidebarOpen)}
-        />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Navbar user={user} onLogout={handleLogout} />
-          <main className="flex-1 overflow-y-auto bg-[#F8FAFC]">
-            <Routes>
-              <Route path="/dashboard" element={<PatientDashboard user={user} />} />
-              <Route path="/caregiver" element={<CaregiverDashboard user={user} />} />
-              <Route path="/screening" element={<ScreeningPage user={user} />} />
-              <Route path="/activities" element={<ActivitiesPage user={user} />} />
-              <Route path="/consult" element={<DoctorConsultPage user={user} />} />
-              <Route path="/medications" element={<MedicationsPage user={user} />} />
-              <Route path="/alerts" element={<AlertsPage user={user} />} />
-              <Route path="*" element={<Navigate to={getDashboardPath()} />} />
-            </Routes>
-          </main>
-        </div>
-      </div>
+      <Routes>
+        {/* Public Standalone Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/screening" element={<ScreeningPage />} />
+        
+        {/* Auth Routes */}
+        <Route path="/login" element={!user ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/dashboard" />} />
+        <Route path="/register" element={!user ? <RegisterPage onLogin={handleLogin} /> : <Navigate to="/dashboard" />} />
+
+        {/* Dashboard Layout Routes (Protected) */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute user={user}>
+            <DashboardLayout user={user!} onLogout={handleLogout}>
+              <PatientDashboard user={user!} />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/caregiver" element={
+          <ProtectedRoute user={user}>
+            <DashboardLayout user={user!} onLogout={handleLogout}>
+              <CaregiverDashboard user={user!} />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/doctor" element={
+          <ProtectedRoute user={user}>
+            <DashboardLayout user={user!} onLogout={handleLogout}>
+              <DoctorConsultPage user={user!} />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+        
+        {/* Deprecated/Alias mapped strictly correctly above, maintaining generic consult map */}
+        <Route path="/consult" element={<Navigate to="/doctor" />} />
+
+        <Route path="/activities" element={
+          <ProtectedRoute user={user}>
+            <DashboardLayout user={user!} onLogout={handleLogout}>
+              <ActivitiesPage user={user!} />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/medications" element={
+          <ProtectedRoute user={user}>
+            <DashboardLayout user={user!} onLogout={handleLogout}>
+              <MedicationsPage user={user!} />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/alerts" element={
+          <ProtectedRoute user={user}>
+            <DashboardLayout user={user!} onLogout={handleLogout}>
+              <AlertsPage user={user!} />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </Router>
   );
 }

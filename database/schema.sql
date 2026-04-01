@@ -5,12 +5,40 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
+-- FULL RESET (CLEARS PREVIOUS FAILED ATTEMPTS)
+-- ============================================
+DROP TABLE IF EXISTS alerts CASCADE;
+DROP TABLE IF EXISTS family_members CASCADE;
+DROP TABLE IF EXISTS activity_results CASCADE;
+DROP TABLE IF EXISTS activities CASCADE;
+DROP TABLE IF EXISTS caregiver_logs CASCADE;
+DROP TABLE IF EXISTS medication_logs CASCADE;
+DROP TABLE IF EXISTS medications CASCADE;
+DROP TABLE IF EXISTS consult_requests CASCADE;
+DROP TABLE IF EXISTS doctors CASCADE;
+DROP TABLE IF EXISTS ai_analyses CASCADE;
+DROP TABLE IF EXISTS assessment_results CASCADE;
+DROP TABLE IF EXISTS assessments CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+DROP TYPE IF EXISTS user_role CASCADE;
+DROP TYPE IF EXISTS assessment_level CASCADE;
+DROP TYPE IF EXISTS assessment_status CASCADE;
+DROP TYPE IF EXISTS test_type CASCADE;
+DROP TYPE IF EXISTS risk_level CASCADE;
+DROP TYPE IF EXISTS log_type CASCADE;
+DROP TYPE IF EXISTS activity_type CASCADE;
+DROP TYPE IF EXISTS difficulty_level CASCADE;
+DROP TYPE IF EXISTS medication_status CASCADE;
+DROP TYPE IF EXISTS alert_type CASCADE;
+DROP TYPE IF EXISTS alert_severity CASCADE;
+DROP TYPE IF EXISTS consult_status CASCADE;
 -- ENUM TYPES
 -- ============================================
 
 CREATE TYPE user_role AS ENUM ('patient', 'caregiver', 'doctor', 'admin');
-CREATE TYPE screening_level AS ENUM ('scd', 'mci', 'dementia');
-CREATE TYPE screening_status AS ENUM ('in_progress', 'completed', 'abandoned');
+CREATE TYPE assessment_level AS ENUM ('scd', 'mci', 'dementia');
+CREATE TYPE assessment_status AS ENUM ('in_progress', 'completed', 'abandoned');
 CREATE TYPE test_type AS ENUM ('ad8', 'orientation', 'verbal_fluency', 'trail_making', 'clock_drawing', 'moca');
 CREATE TYPE risk_level AS ENUM ('low', 'moderate', 'high');
 CREATE TYPE log_type AS ENUM ('daily_checkin', 'incident', 'observation');
@@ -37,20 +65,20 @@ CREATE TABLE users (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Screenings
-CREATE TABLE screenings (
+-- Assessments
+CREATE TABLE assessments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    level screening_level NOT NULL DEFAULT 'scd',
-    status screening_status NOT NULL DEFAULT 'in_progress',
+    level assessment_level NOT NULL DEFAULT 'scd',
+    status assessment_status NOT NULL DEFAULT 'in_progress',
     started_at TIMESTAMPTZ DEFAULT NOW(),
     completed_at TIMESTAMPTZ
 );
 
--- Screening Results
-CREATE TABLE screening_results (
+-- Assessment Results
+CREATE TABLE assessment_results (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    screening_id UUID NOT NULL REFERENCES screenings(id) ON DELETE CASCADE,
+    assessment_id UUID NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
     test_type test_type NOT NULL,
     responses JSONB NOT NULL DEFAULT '{}',
     score FLOAT DEFAULT 0,
@@ -60,7 +88,7 @@ CREATE TABLE screening_results (
 -- AI Analyses
 CREATE TABLE ai_analyses (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    screening_id UUID NOT NULL REFERENCES screenings(id) ON DELETE CASCADE,
+    assessment_id UUID NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
     risk_level risk_level NOT NULL DEFAULT 'low',
     risk_score FLOAT DEFAULT 0,
     interpretation TEXT,
@@ -83,7 +111,7 @@ CREATE TABLE consult_requests (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     patient_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     doctor_id UUID NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
-    screening_id UUID REFERENCES screenings(id),
+    assessment_id UUID REFERENCES assessments(id),
     summary TEXT,
     status consult_status NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -169,9 +197,9 @@ CREATE TABLE alerts (
 -- INDEXES
 -- ============================================
 
-CREATE INDEX idx_screenings_user ON screenings(user_id);
-CREATE INDEX idx_screening_results_screening ON screening_results(screening_id);
-CREATE INDEX idx_ai_analyses_screening ON ai_analyses(screening_id);
+CREATE INDEX idx_assessments_user ON assessments(user_id);
+CREATE INDEX idx_assessment_results_assessment ON assessment_results(assessment_id);
+CREATE INDEX idx_ai_analyses_assessment ON ai_analyses(assessment_id);
 CREATE INDEX idx_caregiver_logs_patient ON caregiver_logs(patient_id);
 CREATE INDEX idx_caregiver_logs_caregiver ON caregiver_logs(caregiver_id);
 CREATE INDEX idx_medications_patient ON medications(patient_id);
@@ -188,8 +216,8 @@ CREATE INDEX idx_consult_requests_doctor ON consult_requests(doctor_id);
 -- ============================================
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE screenings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE screening_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE assessments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE assessment_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_analyses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE doctors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE consult_requests ENABLE ROW LEVEL SECURITY;
@@ -207,10 +235,10 @@ ALTER TABLE alerts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role full access" ON users
     FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Service role full access" ON screenings
+CREATE POLICY "Service role full access" ON assessments
     FOR ALL USING (true) WITH CHECK (true);
 
-CREATE POLICY "Service role full access" ON screening_results
+CREATE POLICY "Service role full access" ON assessment_results
     FOR ALL USING (true) WITH CHECK (true);
 
 CREATE POLICY "Service role full access" ON ai_analyses

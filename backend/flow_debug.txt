@@ -1,0 +1,34 @@
+﻿============================================================
+STEP 1: Start Assessment
+  assessment_id: 419bea19-8e2a-4dd7-8131-165800efe413
+  level1_context keys: ['orientation', 'recall_words']
+  orientation questions count: 4
+    first question: {'id': 'year', 'label': 'What year is it?', 'options': ['2025', '2028', '2026', '2024']}
+  recall_words: ['grass', 'sock', 'belt', 'suit', 'ink']
+
+============================================================
+STEP 2: Submit Level 1
+  status: 200
+  current_level: 2
+  next_step: LEVEL2
+  risk_band: high
+  level2_context keys: ['digit_span', 'visual_recognition', 'visual_pattern', 'verbal_fluency']
+    digit_span: YES
+    visual_recognition: YES
+    visual_pattern: YES
+    verbal_fluency: YES
+    stroop (should be NO): NO
+
+============================================================
+STEP 3: Submit Level 2
+  status: 200
+  current_level: 3
+  next_step: LEVEL3
+  risk_band: high
+  level3_context keys: ['stroop']
+    stroop.trials count: 10
+    stroop.total: 10
+    stroop.color_options: [{'name': 'RED', 'hex': '#DC3545'}, {'name': 'BLUE', 'hex': '#0D6EFD'}, {'name': 'GREEN', 'hex': '#198754'}, {'name': 'YELLOW', 'hex': '#FFC107'}]
+
+============================================================
+DONE

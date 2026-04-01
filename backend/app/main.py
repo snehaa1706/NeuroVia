@@ -5,7 +5,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
-from app.routers import auth, screening, ai, caregiver, doctor, activities, medications, alerts
+from app.routers import auth, screening, ai, caregiver, doctor, activities, medications, alerts, transcribe
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -20,7 +20,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,6 +34,7 @@ app.include_router(doctor.router, prefix="/doctors", tags=["Doctors"])
 app.include_router(activities.router, prefix="/activities", tags=["Activities"])
 app.include_router(medications.router, prefix="/medications", tags=["Medications"])
 app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])
+app.include_router(transcribe.router, prefix="/audio", tags=["Audio Transcription"])
 
 
 @app.get("/")

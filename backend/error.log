@@ -1,0 +1,21 @@
+HTTPException(status_code=500, detail='Transaction failed')
+
+Traceback (most recent call last):
+  File "C:\Users\91974\Desktop\Projects\Neurovia\backend\app\routers\screening.py", line 76, in submit_level1
+    AssessmentDBService.insert_assessment_result(assessment_id, user_id, "level1", cog_score, risk_data["risk_score"])
+  File "C:\Users\91974\Desktop\Projects\Neurovia\backend\app\services\db_service.py", line 102, in insert_assessment_result
+    res = supabase_admin.table("assessment_results").insert(data).execute()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\91974\AppData\Local\Programs\Python\Python312\Lib\site-packages\postgrest\_sync\request_builder.py", line 53, in execute
+    raise APIError(dict(json_obj))
+postgrest.exceptions.APIError: {'message': "Could not find the 'cognitive_score' column of 'assessment_results' in the schema cache", 'code': 'PGRST204', 'hint': None, 'details': None}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\91974\Desktop\Projects\Neurovia\backend\test_route_debug.py", line 15, in main
+    res = await submit_level1(ass["id"], req, "00000000-0000-0000-0000-000000000000")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\91974\Desktop\Projects\Neurovia\backend\app\routers\screening.py", line 96, in submit_level1
+    raise HTTPException(status_code=500, detail="Transaction failed")
+fastapi.exceptions.HTTPException: 500: Transaction failed
