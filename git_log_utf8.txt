@@ -1,0 +1,2 @@
+6d00769 feat: redesign patient dashboard, navbar, and sidebar to match reference
+6207cd8 Complete UI redesign and backend AI integration

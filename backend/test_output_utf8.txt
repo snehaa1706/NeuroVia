@@ -1,0 +1,496 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0
+rootdir: c:\Users\Nishant Chakravarthy\Desktop\Projects\Neurovia\backend
+configfile: pyproject.toml
+plugins: anyio-4.13.0, asyncio-1.3.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 31 items
+
+tests\test_ai_service.py ...                                             [  9%]
+tests\test_alert_service.py ....                                         [ 22%]
+tests\test_caregiver_service.py ....F.F                                  [ 45%]
+tests\test_cognitive_alerts.py ...                                       [ 54%]
+tests\test_cognitive_integration.py .                                    [ 58%]
+tests\test_cognitive_router.py FFFFF                                     [ 74%]
+tests\test_cognitive_service.py .F..FF.F                                 [100%]
+
+================================== FAILURES ===================================
+__________________________ test_get_patient_overview __________________________
+
+sb_mock = <MagicMock name='get_supabase()' id='1475143802496'>
+
+    def test_get_patient_overview(sb_mock):
+        """Test patient overview aggregates data correctly."""
+        with patch("app.services.caregiver_service.validate_assignment"), \
+             patch("app.services.caregiver_service._get_medication_adherence") as mock_meds, \
+             patch("app.services.caregiver_service._get_activity_summary") as mock_acts:
+    
+            # Mock med and act helpers
+            from app.models.caregiver import MedicationAdherence, ActivitySummary
+            mock_meds.return_value = MedicationAdherence(taken=5, missed=0, rate=100.0)
+            mock_acts.return_value = ActivitySummary(completed=2, avg_score=5.0)
+    
+            # Mock DB queries: patient -> logs -> incidents
+            table_mock = mock_supabase_builder()
+            sb_mock.table.return_value = table_mock
+    
+            patient_res = MagicMock(data={"id": "pat_1", "full_name": "Test"})
+            logs_res = MagicMock(data=[{"id": "log1"}])
+            incs_res = MagicMock(data=[{"id": "inc1"}])
+            table_mock.execute.side_effect = [patient_res, logs_res, incs_res]
+    
+>           res = get_patient_overview("cg_1", "pat_1")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_caregiver_service.py:134: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\caregiver_service.py:380: in get_patient_overview
+    cognitive_summary = compute_cognitive_summary(patient_id)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\services\cognitive_service.py:160: in compute_cognitive_summary
+    .execute())
+     ^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <postgrest._sync.request_builder.SyncSelectRequestBuilder object at 0x0000015775639160>
+
+    def execute(self) -> APIResponse:
+        """Execute the query.
+    
+        .. tip::
+            This is the last method called, after the query is built.
+    
+        Returns:
+            :class:`APIResponse`
+    
+        Raises:
+            :class:`APIError` If the API raised an error.
+        """
+        r = self.request.send()
+        try:
+            if r.is_success:
+                return APIResponse.from_http_request_response(r)
+            else:
+                json_obj = model_validate_json(APIErrorFromJSON, r.content)
+>               raise APIError(dict(json_obj))
+E               postgrest.exceptions.APIError: {'message': "Could not find the table 'public.cognitive_results' in the schema cache", 'code': 'PGRST205', 'hint': "Perhaps you meant the table 'public.activity_results'", 'details': None}
+
+..\..\..\..\AppData\Roaming\Python\Python314\site-packages\postgrest\_sync\request_builder.py:53: APIError
+______________________ test_generate_guidance_cache_miss ______________________
+
+sb_mock = <MagicMock name='get_supabase()' id='1475164026064'>
+
+    @pytest.mark.asyncio
+    async def test_generate_guidance_cache_miss(sb_mock):
+        """Test AI guidance generated on cache miss."""
+        with patch("app.services.caregiver_service.validate_assignment"), \
+             patch("app.services.caregiver_service._get_medication_adherence") as mock_meds, \
+             patch("app.services.caregiver_service._get_activity_summary") as mock_acts, \
+             patch("app.services.ai_service.generate_caregiver_guidance") as mock_ai:
+    
+            # Empty cache mock
+            table_mock = mock_supabase_builder()
+            sb_mock.table.return_value = table_mock
+    
+            # 1. Cache miss []
+            # 2. Logs []
+            # 3. Incs []
+            # 4. existing cache [] -> (no soft delete loop to run)
+            # 5. insert
+            table_mock.execute.side_effect = [
+                MagicMock(data=[]), # cache
+                MagicMock(data=[{"mood": "calm", "confusion_level": 2}]), # logs
+                MagicMock(data=[]), # incs
+                MagicMock(data=[]), # existing
+                MagicMock() # insert exec
+            ]
+    
+            from app.models.caregiver import MedicationAdherence, ActivitySummary
+            mock_meds.return_value = MedicationAdherence(taken=5, missed=0, rate=100.0)
+            mock_acts.return_value = ActivitySummary(completed=2, avg_score=5.0)
+    
+            mock_ai.return_value = {"risk_level": "high", "guidance": "AI generated"}
+    
+>           res = await generate_guidance("cg_1", "pat_1")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_caregiver_service.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\services\caregiver_service.py:554: in generate_guidance
+    cognitive_data = compute_cognitive_summary(patient_id)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\services\cognitive_service.py:160: in compute_cognitive_summary
+    .execute())
+     ^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <postgrest._sync.request_builder.SyncSelectRequestBuilder object at 0x000001577592FED0>
+
+    def execute(self) -> APIResponse:
+        """Execute the query.
+    
+        .. tip::
+            This is the last method called, after the query is built.
+    
+        Returns:
+            :class:`APIResponse`
+    
+        Raises:
+            :class:`APIError` If the API raised an error.
+        """
+        r = self.request.send()
+        try:
+            if r.is_success:
+                return APIResponse.from_http_request_response(r)
+            else:
+                json_obj = model_validate_json(APIErrorFromJSON, r.content)
+>               raise APIError(dict(json_obj))
+E               postgrest.exceptions.APIError: {'message': "Could not find the table 'public.cognitive_results' in the schema cache", 'code': 'PGRST205', 'hint': "Perhaps you meant the table 'public.activity_results'", 'details': None}
+
+..\..\..\..\AppData\Roaming\Python\Python314\site-packages\postgrest\_sync\request_builder.py:53: APIError
+___________________________ test_start_session_rbac ___________________________
+
+client = <starlette.testclient.TestClient object at 0x0000015776E6DBE0>
+
+    def test_start_session_rbac(client):
+        """Test Patient endpoint success and schema."""
+>       with patch("app.routers.cognitive._get_user_role_and_id") as mock_auth, \
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+             patch("app.routers.cognitive.cognitive_service.start_session") as mock_start:
+
+tests\test_cognitive_router.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Python314\Lib\unittest\mock.py:1503: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <unittest.mock._patch object at 0x000001577561F770>
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'app.routers.cognitive' from 'c:\\Users\\Nishant Chakravarthy\\Desktop\\Projects\\Neurovia\\backend\\app\\routers\\cognitive.py'> does not have the attribute '_get_user_role_and_id'
+
+C:\Python314\Lib\unittest\mock.py:1473: AttributeError
+_______________________ test_start_session_invalid_role _______________________
+
+client = <starlette.testclient.TestClient object at 0x0000015776E3DE50>
+
+    def test_start_session_invalid_role(client):
+        """Test Caregiver trying to start session fails 403."""
+>       with patch("app.routers.cognitive._get_user_role_and_id") as mock_auth:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cognitive_router.py:37: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Python314\Lib\unittest\mock.py:1503: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <unittest.mock._patch object at 0x000001577561FAF0>
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'app.routers.cognitive' from 'c:\\Users\\Nishant Chakravarthy\\Desktop\\Projects\\Neurovia\\backend\\app\\routers\\cognitive.py'> does not have the attribute '_get_user_role_and_id'
+
+C:\Python314\Lib\unittest\mock.py:1473: AttributeError
+_________________________ test_submit_empty_responses _________________________
+
+client = <starlette.testclient.TestClient object at 0x0000015776E3E710>
+
+    def test_submit_empty_responses(client):
+        """Test 422 standard validation for empty responses array or absent dict missing elements."""
+>       with patch("app.routers.cognitive._get_user_role_and_id") as mock_auth:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cognitive_router.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Python314\Lib\unittest\mock.py:1503: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <unittest.mock._patch object at 0x00000157756A6430>
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'app.routers.cognitive' from 'c:\\Users\\Nishant Chakravarthy\\Desktop\\Projects\\Neurovia\\backend\\app\\routers\\cognitive.py'> does not have the attribute '_get_user_role_and_id'
+
+C:\Python314\Lib\unittest\mock.py:1473: AttributeError
+__________________________ test_history_rbac_patient __________________________
+
+client = <starlette.testclient.TestClient object at 0x0000015776FB0D60>
+
+    def test_history_rbac_patient(client):
+        """Patient can view history."""
+>       with patch("app.routers.cognitive._get_user_role_and_id") as mock_auth, \
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+             patch("app.routers.cognitive.cognitive_service.get_cognitive_history") as mock_hist:
+
+tests\test_cognitive_router.py:53: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Python314\Lib\unittest\mock.py:1503: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <unittest.mock._patch object at 0x00000157756A7690>
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'app.routers.cognitive' from 'c:\\Users\\Nishant Chakravarthy\\Desktop\\Projects\\Neurovia\\backend\\app\\routers\\cognitive.py'> does not have the attribute '_get_user_role_and_id'
+
+C:\Python314\Lib\unittest\mock.py:1473: AttributeError
+____________________ test_assignment_validation_caregiver _____________________
+
+client = <starlette.testclient.TestClient object at 0x0000015776FB10F0>
+
+    def test_assignment_validation_caregiver(client):
+        """Caregiver requires patient_id, triggers validate_assignment deeply inside service."""
+        from fastapi import HTTPException
+>       with patch("app.routers.cognitive._get_user_role_and_id") as mock_auth, \
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+             patch("app.routers.cognitive.cognitive_service.get_cognitive_history") as mock_hist:
+
+tests\test_cognitive_router.py:66: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Python314\Lib\unittest\mock.py:1503: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <unittest.mock._patch object at 0x00000157756A75B0>
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'app.routers.cognitive' from 'c:\\Users\\Nishant Chakravarthy\\Desktop\\Projects\\Neurovia\\backend\\app\\routers\\cognitive.py'> does not have the attribute '_get_user_role_and_id'
+
+C:\Python314\Lib\unittest\mock.py:1473: AttributeError
+__________________________ test_submit_test_success ___________________________
+
+sb_mock = <MagicMock name='get_supabase()' id='1475168628960'>
+
+    def test_submit_test_success(sb_mock):
+        table_mock = mock_supabase_builder()
+        sb_mock.table.return_value = table_mock
+    
+        session_res = MagicMock(data={"id": "session_123", "patient_id": "pat_1", "status": "in_progress", "test_type": "memory_recall", "test_config": {"words": ["apple", "blue", "chair"]}})
+        result_insert_res = MagicMock(data=[{"id": "res_1", "score": 100.0}])
+        update_res = MagicMock()
+    
+        table_mock.execute.side_effect = [session_res, result_insert_res, update_res]
+    
+        payload = TestSubmissionRequest(responses={"words": ["apple", "blue", "chair"]}, time_taken_seconds=10)
+>       res = submit_test("pat_1", "session_123", payload)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_cognitive_service.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+user_id = 'pat_1', session_id = 'session_123'
+payload = TestSubmissionRequest(responses={'words': ['apple', 'blue', 'chair']}, time_taken_seconds=10.0)
+
+    def submit_test(user_id: str, session_id: str, payload: TestSubmissionRequest) -> dict:
+        """Validates inputs, calculates score, stores result, and locks session."""
+        sb = get_supabase()
+    
+        # 1. Fetch & Validate Session
+        session_res = sb.table("cognitive_sessions").select("*").eq("id", session_id).single().execute()
+        if not session_res.data:
+            raise HTTPException(status_code=404, detail="Session not found")
+    
+        session = session_res.data
+    
+        # Ownership Control
+        if session["patient_id"] != user_id:
+            raise HTTPException(status_code=403, detail="Unauthorized to submit logic for this session")
+    
+        # Session State Control
+        if session["status"] == "completed":
+            raise HTTPException(status_code=400, detail="Duplicate submission. Session already completed.")
+        if session["status"] != "in_progress":
+            raise HTTPException(status_code=400, detail="Session is not in progress.")
+    
+        test_type = TestType(session["test_type"])
+        module = TEST_MODULES.get(test_type)
+        if not module:
+            raise HTTPException(status_code=500, detail="Test scoring module not found.")
+    
+        # 2. Score Validation Layer
+        if not module.validate_responses(payload.responses):
+>           raise HTTPException(status_code=400, detail="Invalid test response format given test expectations.")
+E           fastapi.exceptions.HTTPException: 400: Invalid test response format given test expectations.
+
+app\services\cognitive_service.py:99: HTTPException
+_____________________________ test_memory_scoring _____________________________
+
+    def test_memory_scoring():
+        import app.utils.cognitive_tests.memory as memory_test
+        config = {"words": ["apple", "chair", "blue"]}
+        res = {"words": ["apple", "blue"]}
+    
+>       assert memory_test.validate_responses(res) == True
+E       AssertionError: assert False == True
+E        +  where False = <function validate_responses at 0x0000015775495C70>({'words': ['apple', 'blue']})
+E        +    where <function validate_responses at 0x0000015775495C70> = <module 'app.utils.cognitive_tests.memory' from 'c:\\Users\\Nishant Chakravarthy\\Desktop\\Projects\\Neurovia\\backend\\app\\utils\\cognitive_tests\\memory.py'>.validate_responses
+
+tests\test_cognitive_service.py:98: AssertionError
+____________________________ test_fluency_scoring _____________________________
+
+    def test_fluency_scoring():
+        import app.utils.cognitive_tests.fluency as fluency_test
+        config = {"category": "animals"}
+        res = {"words": ["dog", "cat", "dog", "lion"]}
+    
+        assert fluency_test.validate_responses(res) == True
+>       assert fluency_test.calculate_score(res, config) == 18.75 # 3 unique words -> 3 * 6.25 = 18.75 (maxes at 16)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 10.0 == 18.75
+E        +  where 10.0 = <function calculate_score at 0x0000015775496140>({'words': ['dog', 'cat', 'dog', 'lion']}, {'category': 'animals'})
+E        +    where <function calculate_score at 0x0000015775496140> = <module 'app.utils.cognitive_tests.fluency' from 'c:\\Users\\Nishant Chakravarthy\\Desktop\\Projects\\Neurovia\\backend\\app\\utils\\cognitive_tests\\fluency.py'>.calculate_score
+
+tests\test_cognitive_service.py:107: AssertionError
+____________________________ test_sequence_scoring ____________________________
+
+    def test_sequence_scoring():
+        import app.utils.cognitive_tests.sequence as sequence_test
+        config = {"sequence": [1, 4, 7, 2]}
+        res = {"sequence": [1, 4, 6, 2]}
+    
+>       assert sequence_test.validate_responses(res) == True
+E       AssertionError: assert False == True
+E        +  where False = <function validate_responses at 0x00000157754966C0>({'sequence': [1, 4, 6, 2]})
+E        +    where <function validate_responses at 0x00000157754966C0> = <module 'app.utils.cognitive_tests.sequence' from 'c:\\Users\\Nishant Chakravarthy\\Desktop\\Projects\\Neurovia\\backend\\app\\utils\\cognitive_tests\\sequence.py'>.validate_responses
+
+tests\test_cognitive_service.py:123: AssertionError
+============================== warnings summary ===============================
+..\..\..\..\AppData\Roaming\Python\Python314\site-packages\slowapi\extension.py:717
+  C:\Users\Nishant Chakravarthy\AppData\Roaming\Python\Python314\site-packages\slowapi\extension.py:717: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+app\models\cognitive.py:22
+  c:\Users\Nishant Chakravarthy\Desktop\Projects\Neurovia\backend\app\models\cognitive.py:22: PytestCollectionWarning: cannot collect test class 'TestSubmissionRequest' because it has a __init__ constructor (from: tests/test_cognitive_service.py)
+    class TestSubmissionRequest(BaseModel):
+
+app\models\cognitive.py:6
+  c:\Users\Nishant Chakravarthy\Desktop\Projects\Neurovia\backend\app\models\cognitive.py:6: PytestCollectionWarning: cannot collect test class 'TestType' because it has a __new__ constructor (from: tests/test_cognitive_service.py)
+    class TestType(str, Enum):
+
+tests/test_caregiver_service.py::test_get_patient_overview
+  C:\Users\Nishant Chakravarthy\AppData\Roaming\Python\Python314\site-packages\supabase\_sync\client.py:309: DeprecationWarning: The 'timeout' parameter is deprecated. Please configure it in the http client instead.
+    return SyncPostgrestClient(
+
+tests/test_caregiver_service.py::test_get_patient_overview
+  C:\Users\Nishant Chakravarthy\AppData\Roaming\Python\Python314\site-packages\supabase\_sync\client.py:309: DeprecationWarning: The 'verify' parameter is deprecated. Please configure it in the http client instead.
+    return SyncPostgrestClient(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_caregiver_service.py::test_get_patient_overview - postgrest...
+FAILED tests/test_caregiver_service.py::test_generate_guidance_cache_miss - p...
+FAILED tests/test_cognitive_router.py::test_start_session_rbac - AttributeErr...
+FAILED tests/test_cognitive_router.py::test_start_session_invalid_role - Attr...
+FAILED tests/test_cognitive_router.py::test_submit_empty_responses - Attribut...
+FAILED tests/test_cognitive_router.py::test_history_rbac_patient - AttributeE...
+FAILED tests/test_cognitive_router.py::test_assignment_validation_caregiver
+FAILED tests/test_cognitive_service.py::test_submit_test_success - fastapi.ex...
+FAILED tests/test_cognitive_service.py::test_memory_scoring - AssertionError:...
+FAILED tests/test_cognitive_service.py::test_fluency_scoring - AssertionError...
+FAILED tests/test_cognitive_service.py::test_sequence_scoring - AssertionErro...
+================== 11 failed, 20 passed, 5 warnings in 2.70s ==================

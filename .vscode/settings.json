@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./backend"
+    ],
+    "python.defaultInterpreterPath": "C:\\Python314\\python.exe"
+}

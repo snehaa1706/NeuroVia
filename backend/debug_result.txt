@@ -1,0 +1,81 @@
+﻿============================================================
+Step 1: Testing Supabase connection...
+python : Traceback (most 
+recent call last):
+At line:1 char:1
++ python debug_signup.py 
+2>&1 | Out-File -Encoding 
+utf8 debug_result.tx ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo        
+      : NotSpecified: (T  
+  raceback (most recent   
+  call last)::String)     
+[], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+  File "C:\Users\Nishant C
+hakravarthy\Desktop\Projec
+ts\Neurovia\backend\debug_
+signup.py", line 21, in 
+test_signup
+    print(f"  \u2713 
+Supabase client created")
+    ~~~~~^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\e
+ncodings\cp1252.py", line 
+19, in encode
+    return codecs.charmap_
+encode(input,self.errors,e
+ncoding_table)[0]
+           ~~~~~~~~~~~~~~~
+~~~~~~^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
+UnicodeEncodeError: 
+'charmap' codec can't 
+encode character '\u2713' 
+in position 2: character 
+maps to <undefined>
+
+During handling of the 
+above exception, another 
+exception occurred:
+
+Traceback (most recent 
+call last):
+  File "C:\Users\Nishant C
+hakravarthy\Desktop\Projec
+ts\Neurovia\backend\debug_
+signup.py", line 130, in 
+<module>
+    test_signup()
+    ~~~~~~~~~~~^^
+  File "C:\Users\Nishant C
+hakravarthy\Desktop\Projec
+ts\Neurovia\backend\debug_
+signup.py", line 23, in 
+test_signup
+    print(f"  \u2717 
+FAILED to create Supabase 
+client: {e}")
+    ~~~~~^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^
+  File "C:\Python314\Lib\e
+ncodings\cp1252.py", line 
+19, in encode
+    return codecs.charmap_
+encode(input,self.errors,e
+ncoding_table)[0]
+           ~~~~~~~~~~~~~~~
+~~~~~~^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
+UnicodeEncodeError: 
+'charmap' codec can't 
+encode character '\u2717' 
+in position 2: character 
+maps to <undefined>
