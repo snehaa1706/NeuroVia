@@ -2,3 +2,15 @@ backend/.env
 frontend/.env
 node_modules/
 .env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Scratch/temp files
+.git_status.txt
+.gitinfo.txt
+.git_branches.txt
+_gitinfo.py
+_gitinfo2.py
