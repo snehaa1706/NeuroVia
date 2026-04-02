@@ -22,9 +22,11 @@ async def generate_ai_response(system_prompt: str, user_prompt: str) -> str:
     if provider == "ollama":
         try:
             # Step 1: Use the Ollama API
-            url = "http://localhost:11434/api/generate"
+            base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+            model = os.getenv("OLLAMA_MODEL", "llama3")
+            url = f"{base_url}/api/generate"
             payload = {
-                "model": "llama3",
+                "model": model,
                 "prompt": full_prompt,
                 "stream": False
             }

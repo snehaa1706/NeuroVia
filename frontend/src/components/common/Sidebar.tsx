@@ -9,7 +9,6 @@ import {
     ChevronLeft,
     ChevronRight,
     Brain,
-    Heart,
     Zap,
 } from 'lucide-react';
 import type { User } from '../../types';
@@ -39,7 +38,8 @@ export default function Sidebar({ user, isOpen, onToggle, alertCount = 0 }: Side
     ];
 
     const doctorLinks = [
-        { to: '/consult', icon: Stethoscope, label: 'Consultations' },
+        { to: '/doctor', icon: LayoutDashboard, label: 'Dashboard' },
+        { to: '/doctor/consultations', icon: Stethoscope, label: 'Consultations' },
         { to: '/alerts', icon: AlertTriangle, label: 'Alerts', badge: alertCount },
     ];
 

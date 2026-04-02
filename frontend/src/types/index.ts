@@ -74,9 +74,38 @@ export interface ConsultRequest {
     patient_id: string;
     doctor_id: string;
     screening_id?: string;
+    assessment_id?: string;
     summary?: string;
+    risk_level?: string;
+    key_concerns?: string[];
+    suggested_actions?: string[];
     status: string;
     created_at?: string;
+    updated_at?: string;
+}
+
+export interface ConsultResponse {
+    id: string;
+    request_id: string;
+    doctor_id: string;
+    diagnosis?: string;
+    notes?: string;
+    prescription?: Record<string, any>[];
+    follow_up_date?: string;
+    created_at?: string;
+}
+
+export interface ConsultDetail extends ConsultRequest {
+    doctor?: Doctor;
+    responses: ConsultResponse[];
+}
+
+export interface PaginatedConsultList {
+    items: ConsultRequest[];
+    total: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
 }
 
 // Caregiver

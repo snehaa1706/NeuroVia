@@ -143,8 +143,35 @@ class ApiClient {
         });
     }
 
-    async getConsultRequests() {
-        return this.request<any>('/doctors/consult/requests');
+    async getConsultRequests(status?: string, page: number = 1, pageSize: number = 20) {
+        const params = new URLSearchParams();
+        if (status) params.append('status', status);
+        params.append('page', String(page));
+        params.append('page_size', String(pageSize));
+        return this.request<any>(`/doctors/consult/requests?${params}`);
+    }
+
+    async getConsultDetail(consultId: string) {
+        return this.request<any>(`/doctors/consult/requests/${consultId}`);
+    }
+
+    async updateConsultStatus(consultId: string, status: string) {
+        return this.request<any>(`/doctors/consult/requests/${consultId}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status }),
+        });
+    }
+
+    async submitConsultResponse(consultId: string, data: {
+        diagnosis: string;
+        notes?: string;
+        prescription?: any[];
+        follow_up_date?: string;
+    }) {
+        return this.request<any>(`/doctors/consult/requests/${consultId}/respond`, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
     }
 
     async getPatientOverview(patientId: string) {
